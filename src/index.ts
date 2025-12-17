@@ -1,10 +1,11 @@
 import express from "ultimate-express";
 import errorhandler from "errorhandler";
-import { domainQuery, errorNotification, redirectQuery } from "./helpers";
+import {  errorNotification } from "./helpers";
 import { apiRouter } from "./api";
 import compression from "compression";
 import pinoHttp from "pino-http";
 import path from "path";
+import { domainQuery, redirectQuery } from "./queries";
 
 const app = express();
 const pino = pinoHttp();

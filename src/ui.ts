@@ -1,5 +1,5 @@
 import express from "ultimate-express";
-import { getAllLinksQuery } from "./helpers";
+import { getAllLinksQuery } from "./queries";
 
 export const uiRouter = express.Router();
 
