@@ -6,6 +6,7 @@ import compression from "compression";
 import pinoHttp from "pino-http";
 import path from "path";
 import { domainQuery, redirectQuery } from "./queries";
+import { uiRouter } from "./ui";
 
 const app = express();
 const pino = pinoHttp();
@@ -56,11 +57,7 @@ app.use(async (req, res, next) => {
 });
 
 app.use("/api", apiRouter);
-
-app.get("/", (_req, res) => {
-  // res.sendFile("create.html", { root: "public" });
-  res.render("create");
-});
+app.use("/", uiRouter);
 
 app.get("/s/:slug", async (req, res) => {
   const start = performance.now();
@@ -83,9 +80,9 @@ app.get("/s/:slug", async (req, res) => {
   });
 });
 
-app.get("/create", (_req, res) => {
-  res.sendFile("create.html", { root: "public" });
-});
+// app.get("/create", (_req, res) => {
+//   res.sendFile("create.html", { root: "public" });
+// });
 
 const server = app.listen(3000, () => {
   console.log("🚀 Server running on port 3000");
