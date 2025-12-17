@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Shortener</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --card-bg: #ffffff;
+      --primary: #3498db;
+      --primary-hover: #2980b9;
+      --success: #27ae60;
+      --error: #e74c3c;
+      --text-main: #2c3e50;
+      --text-muted: #7f8c8d;
+      --border: #e0e0e0;
+      --radius-lg: 16px;
+      --radius-md: 8px;
+      --radius-sm: 6px;
+      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --focus-ring: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      min-height: 100vh;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-gradient);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      color: var(--text-main);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 40px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      margin-bottom: -2px;
+    }
+
+    /* Dashboard Styles */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card h3 {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .stat-card .value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    /* Form Common Styles */
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input[type="url"],
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input::placeholder {
+      color: #b0b0b0;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: var(--focus-ring);
+    }
+
+    button {
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.05s ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    /* Create Form Specific */
+    #createForm {
+      display: none;
+      text-align: center;
+    }
+
+    #createForm .actions {
+      grid-template-columns: 1fr;
+    }
+
+    .result-container {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: var(--radius-md);
+      display: none;
+    }
+
+    .result-title {
+      color: var(--success);
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .result-url {
+      word-break: break-all;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--success);
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .error-message {
+      color: var(--error);
+      margin-top: 15px;
+      padding: 10px;
+      background: #fdeded;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Links Container (Dashboard) */
+    .links-container {
+      margin-top: 20px;
+    }
+
+    .links-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .links-header h2 {
+      font-size: 1.2rem;
+    }
+
+    .link-item {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .link-info .short {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .link-info .original {
+      font-size: 14px;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    .link-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .link-actions button {
+      background: transparent;
+      color: var(--primary);
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    .link-actions button:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .link-item {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .tabs {
+        flex-direction: column;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .tab.active {
+        border: 1px solid var(--border);
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="create">Create Link</button>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboardView">
+      <h1>Dashboard</h1>
+      <p class="subtitle">Manage and monitor your shortened links</p>
+
+      <section class="stats">
+        <div class="stat-card">
+          <h3>Total Links</h3>
+          <div class="value">128</div>
+        </div>
+        <div class="stat-card">
+          <h3>Total Clicks</h3>
+          <div class="value">4,392</div>
+        </div>
+        <div class="stat-card">
+          <h3>Active Today</h3>
+          <div class="value">23</div>
+        </div>
+      </section>
+
+      <section class="actions">
+        <input type="url" id="quickUrl" placeholder="Paste a long URL to shorten…" />
+        <button onclick="quickCreate()">Create Link</button>
+      </section>
+
+      <section class="links-container">
+        <div class="links-header">
+          <h2>Your Links</h2>
+        </div>
+<% for (let link of links) { %>
+  <div class="link-item">
+    <div class="link-info">
+      <div class="short"><%= link.shortLink %></div>
+      <div class="original"><%= link.originalUrl %></div>
+      <div class="link-meta">
+        <%= link.clicks %> clicks • Created <%= link.createdAt %>
+      </div>
+    </div>
+    <div class="link-actions">
+      <button onclick="copyToClipboard('<%= link.shortLink %>')">Copy</button>
+    </div>
+  </div>
+<% } %>
+        
+      </section>
+    </div>
+
+    <!-- Create Form View -->
+    <div id="createForm" style="display: none;">
+      <h1>Create Short Link</h1>
+      <p class="subtitle">Enter a URL to generate a shortened version</p>
+
+      <form id="linkForm">
+        <div class="form-group">
+          <label for="url">Long URL</label>
+          <input
+            type="url"
+            id="url"
+            name="url"
+            placeholder="https://example.com/very-long-url"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="slug">Custom Slug (optional)</label>
+          <input
+            type="text"
+            id="slug"
+            name="slug"
+            placeholder="my-custom-slug"
+            pattern="[a-zA-Z0-9_-]+"
+            title="Only letters, numbers, underscores, and hyphens allowed"
+          />
+        </div>
+        <button type="submit">Create Short Link</button>
+      </form>
+
+      <div class="error-message" id="errorMessage"></div>
+
+      <div class="result-container" id="resultContainer">
+        <h3 class="result-title">Success!</h3>
+        <p>Your short link has been created:</p>
+        <div class="result-url" id="shortUrl"></div>
+        <p>Original URL:</p>
+        <div class="result-url" id="originalUrl"></div>
+        <a href="#" class="back-link" onclick="showView('dashboard')">Go to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab Navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const view = tab.dataset.view;
+        showView(view);
+      });
+    });
+
+    function showView(view) {
+      document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
+      document.getElementById('createForm').style.display = view === 'create' ? 'block' : 'none';
+    }
+
+    // Form Submission
+    document.getElementById('linkForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const url = document.getElementById('url').value.trim();
+      const slug = document.getElementById('slug').value.trim() || undefined;
+
+      if (!isValidUrl(url)) {
+        showError('Please enter a valid URL (starting with http:// or https://)');
+        return;
+      }
+
+      hideError();
+      const btn = e.submitter;
+      btn.disabled = true;
+
+      try {
+        // Simulate API call (replace with real fetch in production)
+        
+        const slugValue = slug || '';
+        const baseUrl = window.location.origin;
+        const shortLink = `${baseUrl}/s/${slugValue}`;
+
+        document.getElementById('shortUrl').textContent = shortLink;
+        document.getElementById('originalUrl').textContent = url;
+        document.getElementById('resultContainer').style.display = 'block';
+      } catch (error) {
+        showError(`Error: ${error.message}`);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function isValidUrl(str) {
+      try {
+        const url = new URL(str);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function showError(message) {
+      const el = document.getElementById('errorMessage');
+      el.textContent = message;
+      el.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+
+    // Quick Create (Dashboard input)
+    function quickCreate() {
+      const url = document.getElementById('quickUrl').value.trim();
+      if (url && isValidUrl(url)) {
+        showView('create');
+        document.getElementById('url').value = url;
+      } else {
+        alert('Please enter a valid URL.');
+      }
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      });
+    }
+  </script>
+</body>
+</html>
+
