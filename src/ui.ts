@@ -7,7 +7,7 @@ export const uiRouter = express.Router();
 uiRouter.get("/", async (_req, res) => {
   // res.sendFile("index.html", { root: "public" });
   const links = await getAllLinksQuery.execute()
-  res.render("index", { links } );
+  res.sendFile("index.html", { root: "public"});
 });
 
 

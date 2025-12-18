@@ -6,8 +6,13 @@ import compression from "compression";
 import pinoHttp from "pino-http";
 import path from "path";
 import { domainQuery, redirectQuery } from "./queries";
+import { fileURLToPath } from 'url';
 import { uiRouter } from "./ui";
+import { db } from "./drizzle";
+import { domains } from "./schema";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 const pino = pinoHttp();
 
@@ -19,10 +24,6 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-app.use((_, res, next) => {
-  res.setTimeout(5_000, () => res.sendStatus(504));
-  next();
-});
 app.use(compression())
 
 
@@ -37,32 +38,22 @@ app.use((_, res, next) => {
 });
 app.disable("x-powered-by");
 
-app.use((_req, res, _next) => {
-  res.status(404).send("Sorry can't find that!")
-})
-
-
-
-app.use(async (req, res, next) => {
-  const host = req.hostname.toLowerCase();
-
-  const domain = await domainQuery.execute({ domain: host }).then((r) => r[0]);
-
-  if (!domain) {
-    return res.sendStatus(404);
-  }
-
-  res.locals.domain = domain;
-  next();
-});
-
 app.use("/api", apiRouter);
-app.use("/", uiRouter);
 
 app.get("/s/:slug", async (req, res) => {
   const start = performance.now();
   const { slug } = req.params;
-  const domain = res.locals.domain;
+  
+  // Get domain for redirect - try localhost first, then fallback to any domain
+  let domain = await domainQuery.execute({ domain: "localhost:3000" }).then((r) => r[0]);
+  if (!domain) {
+    const availableDomains = await db.select().from(domains).limit(1);
+    domain = availableDomains[0];
+  }
+
+  if (!domain) {
+    return res.sendStatus(404);
+  }
 
   const [link] = await redirectQuery.execute({
     domainId: domain.id,
@@ -78,6 +69,26 @@ app.get("/s/:slug", async (req, res) => {
   res.on("finish", () => {
     req.log.debug(` ${performance.now() - start}ms - Redirected ${slug} to ${link.url}`);
   });
+});
+
+app.use(async (req, res, next) => {
+  const host = req.hostname.toLowerCase();
+
+  const domain = await domainQuery.execute({ domain: host }).then((r) => r[0]);
+
+  if (!domain) {
+    return res.sendStatus(404);
+  }
+
+  res.locals.domain = domain;
+  next();
+});
+
+app.use("/", uiRouter);
+
+// 404 handler
+app.use((_req, res, _next) => {
+  res.status(404).send("Sorry can't find that!")
 });
 
 // app.get("/create", (_req, res) => {

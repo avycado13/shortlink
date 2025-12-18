@@ -1,7 +1,5 @@
-import { and, eq, sql } from "drizzle-orm";
 import type express from "ultimate-express";
-import { db } from "./drizzle";
-import { links, domains } from "./schema";
+
 
 export function generateUniqueString(length: number = 12): string {
   const characters =

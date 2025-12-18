@@ -329,6 +329,8 @@
     <div class="tabs">
       <button class="tab active" data-view="dashboard">Dashboard</button>
       <button class="tab" data-view="create">Create Link</button>
+    <button class="tab" data-view="domain">Domain</button>
+
     </div>
 
     <!-- Dashboard View -->
@@ -360,31 +362,34 @@
         <div class="links-header">
           <h2>Your Links</h2>
         </div>
-
-        <div class="link-item">
-          <div class="link-info">
-            <div class="short">sho.rt/abc123</div>
-            <div class="original">https://example.com/some/very/long/url</div>
-            <div class="link-meta">342 clicks • Created 2 days ago</div>
-          </div>
-          <div class="link-actions">
-            <button onclick="copyToClipboard('sho.rt/abc123')">Copy</button>
-          </div>
-        </div>
-
-        <div class="link-item">
-          <div class="link-info">
-            <div class="short">sho.rt/docs</div>
-            <div class="original">https://docs.example.com/internal/reference</div>
-            <div class="link-meta">91 clicks • Created 1 week ago</div>
-          </div>
-          <div class="link-actions">
-            <button onclick="copyToClipboard('sho.rt/docs')">Copy</button>
-          </div>
+        <div id="linksList">
+          <p>Loading links...</p>
         </div>
       </section>
     </div>
 
+    <div id="domainSettings">
+        <h1>Domain Settings</h1>
+        <p class="subtitle">Manage your custom domains</p>
+        <section class="domain-actions">
+            <form id="domainForm">
+                <div class="form-group">
+                    <label for="domain">Add Custom Domain</label>
+                    <input type="text" id="domain" name="domain" placeholder="example.com" required />
+                </div>
+                <button type="submit">Add Domain</button>
+            </form>
+        </section>
+
+        <section class="domains-list">
+            <h2>Your Domains</h2>
+            <div id="domainsList">
+                <p>Loading domains...</p>
+            </div>
+        </section>
+
+    </div>
+    
     <!-- Create Form View -->
     <div id="createForm" style="display: none;">
       <h1>Create Short Link</h1>
@@ -442,6 +447,139 @@
     function showView(view) {
       document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
       document.getElementById('createForm').style.display = view === 'create' ? 'block' : 'none';
+      document.getElementById('domainSettings').style.display = view === 'domain' ? 'block' : 'none';
+      
+      // Load data when switching views
+      if (view === 'dashboard') {
+        loadDashboardData();
+      } else if (view === 'domain') {
+        loadDomainsData();
+      }
+    }
+
+    // API Helper Functions
+    async function apiCall(endpoint, options = {}) {
+      try {
+        const response = await fetch(endpoint, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+          },
+          ...options
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+      }
+    }
+
+    // Load Dashboard Data
+    async function loadDashboardData() {
+      try {
+        const [linksData, domainsData] = await Promise.all([
+          apiCall('/api/links'),
+          apiCall('/api/domains')
+        ]);
+        
+        updateDashboardStats(linksData, domainsData);
+        updateLinksList(linksData);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        showErrorInDashboard('Failed to load data. Please refresh the page.');
+      }
+    }
+
+    function updateDashboardStats(links, domains) {
+      const totalLinks = links.length;
+      const totalClicks = links.reduce((sum, link) => sum + (link.clicks || 0), 0);
+      const activeToday = links.filter(link => {
+        const createdDate = new Date(link.createdAt);
+        const today = new Date();
+        return createdDate.toDateString() === today.toDateString();
+      }).length;
+
+      document.querySelector('.stats .value').textContent = totalLinks;
+      document.querySelectorAll('.stats .value')[1].textContent = totalClicks.toLocaleString();
+      document.querySelectorAll('.stats .value')[2].textContent = activeToday;
+    }
+
+    function updateLinksList(links) {
+      const linksContainer = document.querySelector('.links-container');
+      const linksHtml = links.map(link => `
+        <div class="link-item">
+          <div class="link-info">
+            <div class="short">${window.location.origin}/s/${link.slug}</div>
+            <div class="original">${link.url}</div>
+            <div class="link-meta">
+              ${link.clicks || 0} clicks • Created ${new Date(link.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+          <div class="link-actions">
+            <button onclick="copyToClipboard('${window.location.origin}/s/${link.slug}')">Copy</button>
+          </div>
+        </div>
+      `).join('');
+      
+      linksContainer.innerHTML = `
+        <div class="links-header">
+          <h2>Your Links</h2>
+        </div>
+        ${linksHtml || '<p>No links found. Create your first link!</p>'}
+      `;
+    }
+
+    function showErrorInDashboard(message) {
+      const linksContainer = document.querySelector('.links-container');
+      linksContainer.innerHTML = `
+        <div class="links-header">
+          <h2>Your Links</h2>
+        </div>
+        <div class="error-message" style="display: block;">${message}</div>
+      `;
+    }
+
+    // Load Domains Data
+    async function loadDomainsData() {
+      try {
+        const domains = await apiCall('/api/domains');
+        updateDomainsList(domains);
+      } catch (error) {
+        console.error('Failed to load domains:', error);
+        const domainsList = document.querySelector('.domains-list');
+        domainsList.innerHTML = `
+          <h2>Your Domains</h2>
+          <div class="error-message" style="display: block;">Failed to load domains. Please refresh the page.</div>
+        `;
+      }
+    }
+
+    function updateDomainsList(domains) {
+      const domainsList = document.querySelector('.domains-list');
+      const domainsHtml = domains.map(domain => `
+        <div class="domain-item">
+          <div class="domain-info">
+            <div class="domain-name">${domain.domain}</div>
+            <div class="domain-meta">
+              Added on ${new Date(domain.addedAt || Date.now()).toLocaleDateString()}
+            </div>
+          </div>
+          <div class="domain-actions">
+            <button onclick="removeDomain('${domain.domain}')">Remove</button>
+          </div>
+        </div>
+      `).join('');
+      
+      domainsList.innerHTML = `
+        <h2>Your Domains</h2>
+        ${domainsHtml || '<p>No custom domains added yet.</p>'}
+      `;
     }
 
     // Form Submission
@@ -460,15 +598,21 @@
       btn.disabled = true;
 
       try {
-        // Simulate API call (replace with real fetch in production)
-        
-        const slugValue = slug || '';
+        const response = await apiCall('/api/links/create', {
+          method: 'POST',
+          body: JSON.stringify({ url, slug })
+        });
+
         const baseUrl = window.location.origin;
-        const shortLink = `${baseUrl}/s/${slugValue}`;
+        const shortLink = `${baseUrl}/s/${slug || response.slug}`;
 
         document.getElementById('shortUrl').textContent = shortLink;
         document.getElementById('originalUrl').textContent = url;
         document.getElementById('resultContainer').style.display = 'block';
+        
+        // Clear form
+        document.getElementById('url').value = '';
+        document.getElementById('slug').value = '';
       } catch (error) {
         showError(`Error: ${error.message}`);
       } finally {
@@ -512,7 +656,50 @@
         alert('Copied to clipboard!');
       });
     }
+
+    // Domain Form Submission
+    document.getElementById('domainForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const domainInput = document.getElementById('domain');
+      const domain = domainInput.value.trim();
+      const btn = e.submitter;
+      
+      if (!domain) {
+        alert('Please enter a domain name.');
+        return;
+      }
+
+      btn.disabled = true;
+
+      try {
+        await apiCall('/api/domains/create', {
+          method: 'POST',
+          body: JSON.stringify({ domain })
+        });
+
+        // Clear form and reload domains
+        domainInput.value = '';
+        loadDomainsData();
+        alert('Domain added successfully!');
+      } catch (error) {
+        alert(`Error adding domain: ${error.message}`);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Remove Domain (placeholder - needs API endpoint)
+    function removeDomain(domainName) {
+      if (confirm(`Are you sure you want to remove ${domainName}?`)) {
+        // TODO: Implement domain removal API call
+        alert('Domain removal not yet implemented.');
+      }
+    }
+
+    // Initialize dashboard on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDashboardData();
+    });
   </script>
 </body>
 </html>
-
