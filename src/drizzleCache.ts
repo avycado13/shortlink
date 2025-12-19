@@ -33,7 +33,7 @@ export class DrizzleLRUCache extends Cache {
     key: string,
     response: any,
     tables: string[],
-    isTag: boolean, // Added 'isTag' parameter
+    _isTag: boolean, // Added 'isTag' parameter (unused but required by interface)
     config?: CacheConfig
   ): Promise<void> {
     const ttl = config?.px ?? (config?.ex ? config.ex * 1000 : this.globalTtl);

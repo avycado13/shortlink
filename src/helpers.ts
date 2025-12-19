@@ -1,6 +1,5 @@
 import type express from "ultimate-express";
 
-
 export function generateUniqueString(length: number = 12): string {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -12,11 +11,13 @@ export function generateUniqueString(length: number = 12): string {
   return uniqueString;
 }
 
-function isValidSlug(slug: string) {
+export function isValidSlug(slug: string): boolean {
+  if (!slug || typeof slug !== "string") return false;
   return /^[a-zA-Z0-9_-]{3,32}$/.test(slug);
 }
 
-function isValidUrl(url: string) {
+export function isValidUrl(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
   try {
     const u = new URL(url);
     return u.protocol === "http:" || u.protocol === "https:";
@@ -25,7 +26,13 @@ function isValidUrl(url: string) {
   }
 }
 
-export function errorNotification(err: Error, str: string, req: express.Request) {
+export function isValidDomain(domain: string): boolean {
+  if (!domain || typeof domain !== "string") return false;
+  const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?::\d+)?$/i;
+  return domainRegex.test(domain) && domain.length <= 253;
+}
+
+export function errorNotification(_err: Error, str: string, req: express.Request): void {
   console.error(`Error in ${req.method} ${req.url}`, str);
 }
 
