@@ -1,705 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Link Shortener</title>
-  <style>
-    :root {
-      --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      --card-bg: #ffffff;
-      --primary: #3498db;
-      --primary-hover: #2980b9;
-      --success: #27ae60;
-      --error: #e74c3c;
-      --text-main: #2c3e50;
-      --text-muted: #7f8c8d;
-      --border: #e0e0e0;
-      --radius-lg: 16px;
-      --radius-md: 8px;
-      --radius-sm: 6px;
-      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
-      --focus-ring: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Link Shortener</title>
+    <style>
+      :root {
+        --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        --card-bg: #ffffff;
+        --primary: #3498db;
+        --primary-hover: #2980b9;
+        --success: #27ae60;
+        --error: #e74c3c;
+        --text-main: #2c3e50;
+        --text-muted: #7f8c8d;
+        --border: #e0e0e0;
+        --radius-lg: 16px;
+        --radius-md: 8px;
+        --radius-sm: 6px;
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --focus-ring: 0 0 0 3px rgba(52, 152, 219, 0.2);
+      }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    html, body {
-      min-height: 100vh;
-    }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-gradient);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        color: var(--text-main);
+      }
 
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg-gradient);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px 20px;
-      color: var(--text-main);
-    }
-
-    .container {
-      width: 100%;
-      max-width: 900px;
-      background: var(--card-bg);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      padding: 40px;
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin-bottom: 30px;
-    }
-
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 30px;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 10px;
-    }
-
-    .tab {
-      padding: 10px 20px;
-      background: transparent;
-      border: none;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      border-radius: var(--radius-md) var(--radius-md) 0 0;
-    }
-
-    .tab.active {
-      color: var(--primary);
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-bottom: none;
-      margin-bottom: -2px;
-    }
-
-    /* Dashboard Styles */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      padding: 20px;
-      border-radius: var(--radius-md);
-      background: #f8f9fa;
-      border: 1px solid var(--border);
-    }
-
-    .stat-card h3 {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .stat-card .value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      margin-bottom: 30px;
-    }
-
-    /* Form Common Styles */
-    .form-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    input[type="url"],
-    input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: var(--radius-md);
-      border: 2px solid var(--border);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input::placeholder {
-      color: #b0b0b0;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: var(--focus-ring);
-    }
-
-    button {
-      padding: 14px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: var(--radius-md);
-      background: var(--primary);
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.05s ease;
-      white-space: nowrap;
-    }
-
-    button:hover {
-      background: var(--primary-hover);
-    }
-
-    button:active {
-      transform: translateY(1px);
-    }
-
-    button:disabled {
-      background: #bdc3c7;
-      cursor: not-allowed;
-    }
-
-    /* Create Form Specific */
-    #createForm {
-      display: none;
-      text-align: center;
-    }
-
-    #createForm .actions {
-      grid-template-columns: 1fr;
-    }
-
-    .result-container {
-      margin-top: 30px;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: var(--radius-md);
-      display: none;
-    }
-
-    .result-title {
-      color: var(--success);
-      margin-bottom: 15px;
-      font-weight: 600;
-    }
-
-    .result-url {
-      word-break: break-all;
-      padding: 12px;
-      background: #ffffff;
-      border-radius: var(--radius-sm);
-      border-left: 4px solid var(--success);
-      margin: 10px 0;
-      font-size: 14px;
-    }
-
-    .error-message {
-      color: var(--error);
-      margin-top: 15px;
-      padding: 10px;
-      background: #fdeded;
-      border-radius: var(--radius-sm);
-      display: none;
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 20px;
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .back-link:hover {
-      text-decoration: underline;
-    }
-
-    /* Links Container (Dashboard) */
-    .links-container {
-      margin-top: 20px;
-    }
-
-    .links-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .links-header h2 {
-      font-size: 1.2rem;
-    }
-
-    .link-item {
-      padding: 14px;
-      border-radius: var(--radius-md);
-      background: #ffffff;
-      border: 1px solid var(--border);
-      margin-bottom: 10px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .link-info .short {
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    .link-info .original {
-      font-size: 14px;
-      color: var(--text-muted);
-      word-break: break-all;
-    }
-
-    .link-meta {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .link-actions button {
-      background: transparent;
-      color: var(--primary);
-      padding: 8px 12px;
-      font-size: 14px;
-    }
-
-    .link-actions button:hover {
-      background: rgba(52, 152, 219, 0.1);
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
       .container {
-        padding: 25px;
-      }
-
-      .actions {
-        grid-template-columns: 1fr;
-      }
-
-      .link-item {
-        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 900px;
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        padding: 40px;
       }
 
       h1 {
-        font-size: 1.5rem;
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        margin-bottom: 30px;
       }
 
+      /* Tabs */
       .tabs {
-        flex-direction: column;
-        border-bottom: none;
-        padding-bottom: 0;
+        display: flex;
+        gap: 16px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .tab {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
       }
 
       .tab.active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+      }
+
+      /* Cards */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: var(--radius-md);
         border: 1px solid var(--border);
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      label {
+        display: block;
         margin-bottom: 8px;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="tabs">
-      <button class="tab active" data-view="dashboard">Dashboard</button>
-      <button class="tab" data-view="create">Create Link</button>
-    <button class="tab" data-view="domain">Domain</button>
 
-    </div>
+      input,
+      select {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--border);
+      }
 
-    <!-- Dashboard View -->
-    <div id="dashboardView">
-      <h1>Dashboard</h1>
-      <p class="subtitle">Manage and monitor your shortened links</p>
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: var(--focus-ring);
+      }
 
-      <section class="stats">
-        <div class="stat-card">
-          <h3>Total Links</h3>
-          <div class="value">128</div>
-        </div>
-        <div class="stat-card">
-          <h3>Total Clicks</h3>
-          <div class="value">4,392</div>
-        </div>
-        <div class="stat-card">
-          <h3>Active Today</h3>
-          <div class="value">23</div>
-        </div>
-      </section>
+      button {
+        padding: 14px 24px;
+        font-size: 16px;
+        border-radius: var(--radius-md);
+        background: var(--primary);
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
 
-      <section class="actions">
-        <input type="url" id="quickUrl" placeholder="Paste a long URL to shorten…" />
-        <button onclick="quickCreate()">Create Link</button>
-      </section>
+      button:hover {
+        background: var(--primary-hover);
+      }
 
-      <section class="links-container">
-        <div class="links-header">
-          <h2>Your Links</h2>
-        </div>
-        <div id="linksList">
-          <p>Loading links...</p>
-        </div>
-      </section>
-    </div>
+      /* Link + Domain Cards */
+      .link-item,
+      .domain-item {
+        padding: 14px;
+        border-radius: var(--radius-md);
+        background: white;
+        border: 1px solid var(--border);
+        margin-bottom: 10px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+      }
 
-    <div id="domainSettings">
+      .link-info .short {
+        color: var(--primary);
+        font-weight: 600;
+      }
+      .link-meta,
+      .domain-meta {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .link-actions button {
+        background: transparent;
+        color: var(--primary);
+        padding: 8px 12px;
+      }
+
+      .domain-actions button {
+        background: transparent;
+        color: var(--error);
+        padding: 8px 12px;
+      }
+
+      #createForm {
+        display: none;
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #2c3e50;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="tabs">
+        <button class="tab active" data-view="dashboard">Dashboard</button>
+        <button class="tab" data-view="create">Create Link</button>
+        <button class="tab" data-view="domain">Domain</button>
+      </div>
+      <!-- Dashboard -->
+      <div id="dashboardView">
+        <h1>Dashboard</h1>
+        <p class="subtitle">Manage and monitor your shortened links</p>
+
+        <section class="stats">
+          <div class="stat-card">
+            <h3>Total Links</h3>
+            <div class="value">—</div>
+          </div>
+          <div class="stat-card">
+            <h3>Total Clicks</h3>
+            <div class="value">—</div>
+          </div>
+          <div class="stat-card">
+            <h3>Active Today</h3>
+            <div class="value">—</div>
+          </div>
+        </section>
+
+        <section class="actions">
+          <input type="url" id="quickUrl" placeholder="Paste a long URL…" />
+          <button onclick="quickCreate()">Create</button>
+        </section>
+
+        <div class="links-container"></div>
+      </div>
+
+      <!-- Domains -->
+      <div id="domainSettings" style="display: none">
         <h1>Domain Settings</h1>
-        <p class="subtitle">Manage your custom domains</p>
-        <section class="domain-actions">
-            <form id="domainForm">
-                <div class="form-group">
-                    <label for="domain">Add Custom Domain</label>
-                    <input type="text" id="domain" name="domain" placeholder="example.com" required />
-                </div>
-                <button type="submit">Add Domain</button>
-            </form>
-        </section>
+        <form id="domainForm" class="form-group">
+          <label>Add Custom Domain</label>
+          <input id="domain" placeholder="example.com" required />
+          <br />
+          <br />
+          <button>Add Domain</button>
+        </form>
+        <div class="domains-list"></div>
+      </div>
 
-        <section class="domains-list">
-            <h2>Your Domains</h2>
-            <div id="domainsList">
-                <p>Loading domains...</p>
-            </div>
-        </section>
+      <!-- Create -->
+      <div id="createForm">
+        <h1>Create Short Link</h1>
 
-    </div>
-    
-    <!-- Create Form View -->
-    <div id="createForm" style="display: none;">
-      <h1>Create Short Link</h1>
-      <p class="subtitle">Enter a URL to generate a shortened version</p>
+        <form id="linkForm">
+          <div class="form-group">
+            <label>Long URL</label>
+            <input id="url" required />
+          </div>
 
-      <form id="linkForm">
-        <div class="form-group">
-          <label for="url">Long URL</label>
-          <input
-            type="url"
-            id="url"
-            name="url"
-            placeholder="https://example.com/very-long-url"
-            required
-          />
+          <div class="form-group">
+            <label>Domain</label>
+            <select id="domainSelect">
+              <option value="">Default domain</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Custom Slug</label>
+            <input id="slug" />
+          </div>
+
+          <button>Create Link</button>
+        </form>
+
+        <div id="resultContainer" style="display: none">
+          <div id="shortUrl"></div>
+          <div id="originalUrl"></div>
         </div>
-        <div class="form-group">
-          <label for="slug">Custom Slug (optional)</label>
-          <input
-            type="text"
-            id="slug"
-            name="slug"
-            placeholder="my-custom-slug"
-            pattern="[a-zA-Z0-9_-]+"
-            title="Only letters, numbers, underscores, and hyphens allowed"
-          />
-        </div>
-        <button type="submit">Create Short Link</button>
-      </form>
-
-      <div class="error-message" id="errorMessage"></div>
-
-      <div class="result-container" id="resultContainer">
-        <h3 class="result-title">Success!</h3>
-        <p>Your short link has been created:</p>
-        <div class="result-url" id="shortUrl"></div>
-        <p>Original URL:</p>
-        <div class="result-url" id="originalUrl"></div>
-        <a href="#" class="back-link" onclick="showView('dashboard')">Go to Dashboard</a>
       </div>
     </div>
-  </div>
+    <div id="toast" class="toast">Copied to clipboard</div>
+    <script>
+      const apiCall = (e, o = {}) =>
+        fetch(e, {
+          headers: { "Content-Type": "application/json" },
+          ...o,
+        }).then((r) => r.json());
 
-  <script>
-    // Tab Navigation
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const view = tab.dataset.view;
-        showView(view);
-      });
-    });
-
-    function showView(view) {
-      document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
-      document.getElementById('createForm').style.display = view === 'create' ? 'block' : 'none';
-      document.getElementById('domainSettings').style.display = view === 'domain' ? 'block' : 'none';
-      
-      // Load data when switching views
-      if (view === 'dashboard') {
-        loadDashboardData();
-      } else if (view === 'domain') {
-        loadDomainsData();
+      function showView(v) {
+        dashboardView.style.display = v === "dashboard" ? "block" : "none";
+        createForm.style.display = v === "create" ? "block" : "none";
+        domainSettings.style.display = v === "domain" ? "block" : "none";
+        if (v === "dashboard") loadDashboardData();
+        if (v === "domain") loadDomainsData();
       }
-    }
 
-    // API Helper Functions
-    async function apiCall(endpoint, options = {}) {
-      try {
-        const response = await fetch(endpoint, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-          },
-          ...options
+      document.querySelectorAll(".tab").forEach(
+        (t) =>
+          (t.onclick = () => {
+            document
+              .querySelectorAll(".tab")
+              .forEach((x) => x.classList.remove("active"));
+            t.classList.add("active");
+            showView(t.dataset.view);
+          })
+      );
+
+      async function loadDashboardData() {
+        const links = await apiCall("/api/links");
+        document.querySelector(".links-container").innerHTML = links
+          .map(
+            (l) => `
+    <div class="link-item">
+      <div>
+        <div class="short">${l.domains.domain}/s/${l.links.slug}</div>
+        <div class="link-meta">${l.clicks || 0} clicks</div>
+      </div>
+      <div class="link-actions"><button onclick="copyToClipboard('${
+        l.domains.domain
+      }/s/${l.links.slug}')">Copy</button></div>
+    </div>
+  `
+          )
+          .join("");
+      }
+
+      async function loadDomainsData() {
+        const domains = await apiCall("/api/domains");
+        populateDomainSelect(domains);
+        document.querySelector(".domains-list").innerHTML = domains
+          .map(
+            (d) => `
+    <div class="domain-item">
+      <div>
+        <div class="domain-name">${d.domain}</div>
+        <div class="domain-meta">Added ${new Date(
+          d.addedAt || Date.now()
+        ).toLocaleDateString()}</div>
+      </div>
+      <div class="domain-actions"><button>Remove</button></div>
+    </div>
+  `
+          )
+          .join("");
+      }
+
+      function populateDomainSelect(domains) {
+        domainSelect.innerHTML = '<option value="">Default domain</option>';
+        domains.forEach((d) => {
+          const o = document.createElement("option");
+          o.value = d.domain;
+          o.textContent = d.domain;
+          domainSelect.appendChild(o);
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-        
-        return await response.json();
-      } catch (error) {
-        console.error('API call failed:', error);
-        throw error;
-      }
-    }
-
-    // Load Dashboard Data
-    async function loadDashboardData() {
-      try {
-        const [linksData, domainsData] = await Promise.all([
-          apiCall('/api/links'),
-          apiCall('/api/domains')
-        ]);
-        
-        updateDashboardStats(linksData, domainsData);
-        updateLinksList(linksData);
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-        showErrorInDashboard('Failed to load data. Please refresh the page.');
-      }
-    }
-
-    function updateDashboardStats(links, domains) {
-      const totalLinks = links.length;
-      const totalClicks = links.reduce((sum, link) => sum + (link.clicks || 0), 0);
-      const activeToday = links.filter(link => {
-        const createdDate = new Date(link.createdAt);
-        const today = new Date();
-        return createdDate.toDateString() === today.toDateString();
-      }).length;
-
-      document.querySelector('.stats .value').textContent = totalLinks;
-      document.querySelectorAll('.stats .value')[1].textContent = totalClicks.toLocaleString();
-      document.querySelectorAll('.stats .value')[2].textContent = activeToday;
-    }
-
-    function updateLinksList(links) {
-      const linksContainer = document.querySelector('.links-container');
-      const linksHtml = links.map(link => `
-        <div class="link-item">
-          <div class="link-info">
-            <div class="short">${window.location.origin}/s/${link.slug}</div>
-            <div class="original">${link.url}</div>
-            <div class="link-meta">
-              ${link.clicks || 0} clicks • Created ${new Date(link.createdAt).toLocaleDateString()}
-            </div>
-          </div>
-          <div class="link-actions">
-            <button onclick="copyToClipboard('${window.location.origin}/s/${link.slug}')">Copy</button>
-          </div>
-        </div>
-      `).join('');
-      
-      linksContainer.innerHTML = `
-        <div class="links-header">
-          <h2>Your Links</h2>
-        </div>
-        ${linksHtml || '<p>No links found. Create your first link!</p>'}
-      `;
-    }
-
-    function showErrorInDashboard(message) {
-      const linksContainer = document.querySelector('.links-container');
-      linksContainer.innerHTML = `
-        <div class="links-header">
-          <h2>Your Links</h2>
-        </div>
-        <div class="error-message" style="display: block;">${message}</div>
-      `;
-    }
-
-    // Load Domains Data
-    async function loadDomainsData() {
-      try {
-        const domains = await apiCall('/api/domains');
-        updateDomainsList(domains);
-      } catch (error) {
-        console.error('Failed to load domains:', error);
-        const domainsList = document.querySelector('.domains-list');
-        domainsList.innerHTML = `
-          <h2>Your Domains</h2>
-          <div class="error-message" style="display: block;">Failed to load domains. Please refresh the page.</div>
-        `;
-      }
-    }
-
-    function updateDomainsList(domains) {
-      const domainsList = document.querySelector('.domains-list');
-      const domainsHtml = domains.map(domain => `
-        <div class="domain-item">
-          <div class="domain-info">
-            <div class="domain-name">${domain.domain}</div>
-            <div class="domain-meta">
-              Added on ${new Date(domain.addedAt || Date.now()).toLocaleDateString()}
-            </div>
-          </div>
-          <div class="domain-actions">
-            <button onclick="removeDomain('${domain.domain}')">Remove</button>
-          </div>
-        </div>
-      `).join('');
-      
-      domainsList.innerHTML = `
-        <h2>Your Domains</h2>
-        ${domainsHtml || '<p>No custom domains added yet.</p>'}
-      `;
-    }
-
-    // Form Submission
-    document.getElementById('linkForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const url = document.getElementById('url').value.trim();
-      const slug = document.getElementById('slug').value.trim() || undefined;
-
-      if (!isValidUrl(url)) {
-        showError('Please enter a valid URL (starting with http:// or https://)');
-        return;
       }
 
-      hideError();
-      const btn = e.submitter;
-      btn.disabled = true;
-
-      try {
-        const response = await apiCall('/api/links/create', {
-          method: 'POST',
-          body: JSON.stringify({ url, slug })
+      linkForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const domain = domainSelect.value || location.host;
+        const slug = slug.value || undefined;
+        const r = await apiCall("/api/links/create", {
+          method: "POST",
+          body: JSON.stringify({ url: url.value, slug, domain }),
         });
+        shortUrl.textContent = `https://${domain}/s/${slug || r.slug}`;
+        originalUrl.textContent = url.value;
+        resultContainer.style.display = "block";
+      };
 
-        const baseUrl = window.location.origin;
-        const shortLink = `${baseUrl}/s/${slug || response.slug}`;
-
-        document.getElementById('shortUrl').textContent = shortLink;
-        document.getElementById('originalUrl').textContent = url;
-        document.getElementById('resultContainer').style.display = 'block';
-        
-        // Clear form
-        document.getElementById('url').value = '';
-        document.getElementById('slug').value = '';
-      } catch (error) {
-        showError(`Error: ${error.message}`);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    function isValidUrl(str) {
-      try {
-        const url = new URL(str);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-      } catch (_) {
-        return false;
-      }
-    }
-
-    function showError(message) {
-      const el = document.getElementById('errorMessage');
-      el.textContent = message;
-      el.style.display = 'block';
-    }
-
-    function hideError() {
-      document.getElementById('errorMessage').style.display = 'none';
-    }
-
-    // Quick Create (Dashboard input)
-    function quickCreate() {
-      const url = document.getElementById('quickUrl').value.trim();
-      if (url && isValidUrl(url)) {
-        showView('create');
-        document.getElementById('url').value = url;
-      } else {
-        alert('Please enter a valid URL.');
-      }
-    }
-
-    // Copy to clipboard
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
-      });
-    }
-
-    // Domain Form Submission
-    document.getElementById('domainForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const domainInput = document.getElementById('domain');
-      const domain = domainInput.value.trim();
-      const btn = e.submitter;
-      
-      if (!domain) {
-        alert('Please enter a domain name.');
-        return;
+      function quickCreate() {
+        showView("create");
+        url.value = quickUrl.value;
       }
 
-      btn.disabled = true;
+      showView("dashboard");
 
-      try {
-        await apiCall('/api/domains/create', {
-          method: 'POST',
-          body: JSON.stringify({ domain })
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          const toast = document.getElementById("toast");
+          toast.classList.add("show");
+
+          clearTimeout(toast._hideTimeout);
+          toast._hideTimeout = setTimeout(() => {
+            toast.classList.remove("show");
+          }, 2000);
         });
-
-        // Clear form and reload domains
-        domainInput.value = '';
-        loadDomainsData();
-        alert('Domain added successfully!');
-      } catch (error) {
-        alert(`Error adding domain: ${error.message}`);
-      } finally {
-        btn.disabled = false;
       }
-    });
-
-    // Remove Domain (placeholder - needs API endpoint)
-    function removeDomain(domainName) {
-      if (confirm(`Are you sure you want to remove ${domainName}?`)) {
-        // TODO: Implement domain removal API call
-        alert('Domain removal not yet implemented.');
-      }
-    }
-
-    // Initialize dashboard on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      loadDashboardData();
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
