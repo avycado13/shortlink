@@ -1,15 +1,17 @@
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import type { Schema } from "./schema";
+import 'dotenv/config';
+
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+
 // import { upstashCache } from "drizzle-orm/cache/upstash";
-import { DrizzleLRUCache } from "./drizzleCache";
+import { DrizzleLRUCache } from './drizzle-cache';
+import type { Schema } from './schema';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
 });
 
-export const db = drizzle<typeof Schema>({
+export const database = drizzle<typeof Schema>({
   client: pool,
   // cache: upstashCache({
   //   // 👇 Redis credentials (optional — can also be pulled from env vars)
@@ -20,5 +22,5 @@ export const db = drizzle<typeof Schema>({
   //   // 👇 Default cache behavior (optional)
   //   config: { ex: 60 },
   // }),
-  cache: new DrizzleLRUCache({ max: 100, ttl: 5000})
+  cache: new DrizzleLRUCache({ max: 5000, ttl: 3600000 }),
 });

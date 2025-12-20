@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -29,7 +29,7 @@
       }
 
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background: var(--bg-gradient);
         display: flex;
         justify-content: center;
@@ -189,7 +189,9 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         opacity: 0;
         transform: translateY(10px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
         pointer-events: none;
         z-index: 1000;
       }
@@ -283,34 +285,34 @@
     <script>
       const apiCall = (e, o = {}) =>
         fetch(e, {
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
           ...o,
-        }).then((r) => r.json());
+        }).then(r => r.json());
 
       function showView(v) {
-        dashboardView.style.display = v === "dashboard" ? "block" : "none";
-        createForm.style.display = v === "create" ? "block" : "none";
-        domainSettings.style.display = v === "domain" ? "block" : "none";
-        if (v === "dashboard") loadDashboardData();
-        if (v === "domain") loadDomainsData();
+        dashboardView.style.display = v === 'dashboard' ? 'block' : 'none';
+        createForm.style.display = v === 'create' ? 'block' : 'none';
+        domainSettings.style.display = v === 'domain' ? 'block' : 'none';
+        if (v === 'dashboard') loadDashboardData();
+        if (v === 'domain') loadDomainsData();
       }
 
-      document.querySelectorAll(".tab").forEach(
-        (t) =>
+      document.querySelectorAll('.tab').forEach(
+        t =>
           (t.onclick = () => {
             document
-              .querySelectorAll(".tab")
-              .forEach((x) => x.classList.remove("active"));
-            t.classList.add("active");
+              .querySelectorAll('.tab')
+              .forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
             showView(t.dataset.view);
-          })
+          }),
       );
 
       async function loadDashboardData() {
-        const links = await apiCall("/api/links");
-        document.querySelector(".links-container").innerHTML = links
+        const links = await apiCall('/api/links');
+        document.querySelector('.links-container').innerHTML = links
           .map(
-            (l) => `
+            l => `
     <div class="link-item">
       <div>
         <div class="short">${l.domains.domain}/s/${l.links.slug}</div>
@@ -320,69 +322,69 @@
         l.domains.domain
       }/s/${l.links.slug}')">Copy</button></div>
     </div>
-  `
+  `,
           )
-          .join("");
+          .join('');
       }
 
       async function loadDomainsData() {
-        const domains = await apiCall("/api/domains");
+        const domains = await apiCall('/api/domains');
         populateDomainSelect(domains);
-        document.querySelector(".domains-list").innerHTML = domains
+        document.querySelector('.domains-list').innerHTML = domains
           .map(
-            (d) => `
+            d => `
     <div class="domain-item">
       <div>
         <div class="domain-name">${d.domain}</div>
         <div class="domain-meta">Added ${new Date(
-          d.addedAt || Date.now()
+          d.addedAt || Date.now(),
         ).toLocaleDateString()}</div>
       </div>
       <div class="domain-actions"><button>Remove</button></div>
     </div>
-  `
+  `,
           )
-          .join("");
+          .join('');
       }
 
       function populateDomainSelect(domains) {
         domainSelect.innerHTML = '<option value="">Default domain</option>';
-        domains.forEach((d) => {
-          const o = document.createElement("option");
+        domains.forEach(d => {
+          const o = document.createElement('option');
           o.value = d.domain;
           o.textContent = d.domain;
           domainSelect.appendChild(o);
         });
       }
 
-      linkForm.onsubmit = async (e) => {
+      linkForm.onsubmit = async e => {
         e.preventDefault();
         const domain = domainSelect.value || location.host;
         const slug = slug.value || undefined;
-        const r = await apiCall("/api/links/create", {
-          method: "POST",
+        const r = await apiCall('/api/links/create', {
+          method: 'POST',
           body: JSON.stringify({ url: url.value, slug, domain }),
         });
         shortUrl.textContent = `https://${domain}/s/${slug || r.slug}`;
         originalUrl.textContent = url.value;
-        resultContainer.style.display = "block";
+        resultContainer.style.display = 'block';
       };
 
       function quickCreate() {
-        showView("create");
+        showView('create');
         url.value = quickUrl.value;
       }
 
-      showView("dashboard");
+      showView('dashboard');
 
       function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-          const toast = document.getElementById("toast");
-          toast.classList.add("show");
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
 
           clearTimeout(toast._hideTimeout);
           toast._hideTimeout = setTimeout(() => {
-            toast.classList.remove("show");
+            toast.classList.remove('show');
           }, 2000);
         });
       }

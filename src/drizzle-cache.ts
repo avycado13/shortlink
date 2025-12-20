@@ -1,7 +1,8 @@
-import { getTableName, is, Table } from "drizzle-orm";
-import { Cache } from "drizzle-orm/cache/core";
-import type { CacheConfig } from "drizzle-orm/cache/core/types";
-import { LRUCache } from "lru-cache";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { getTableName, is, Table } from 'drizzle-orm';
+import { Cache } from 'drizzle-orm/cache/core';
+import type { CacheConfig } from 'drizzle-orm/cache/core/types';
+import { LRUCache } from 'lru-cache';
 
 export class DrizzleLRUCache extends Cache {
   private globalTtl = 1000;
@@ -21,8 +22,8 @@ export class DrizzleLRUCache extends Cache {
     });
   }
 
-  override strategy(): "explicit" | "all" {
-    return "all";
+  override strategy(): 'explicit' | 'all' {
+    return 'all';
   }
 
   override async get(key: string): Promise<any[] | undefined> {
@@ -34,7 +35,7 @@ export class DrizzleLRUCache extends Cache {
     response: any,
     tables: string[],
     _isTag: boolean, // Added 'isTag' parameter (unused but required by interface)
-    config?: CacheConfig
+    config?: CacheConfig,
   ): Promise<void> {
     const ttl = config?.px ?? (config?.ex ? config.ex * 1000 : this.globalTtl);
 

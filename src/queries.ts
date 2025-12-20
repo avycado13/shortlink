@@ -1,28 +1,28 @@
-import { and, eq, sql } from "drizzle-orm";
-import { db } from "./drizzle";
-import { links, domains } from "./schema";
+import { and, eq, sql } from 'drizzle-orm';
 
-export const redirectQuery = db
+import { database } from './drizzle';
+import { domains, links } from './schema';
+
+export const redirectQuery = database
   .select({ url: links.url })
   .from(links)
   .where(
     and(
-      eq(links.domainId, sql.placeholder("domainId")),
-      eq(links.slug, sql.placeholder("slug"))
-    )
+      eq(links.domainId, sql.placeholder('domainId')),
+      eq(links.slug, sql.placeholder('slug')),
+    ),
   )
   .limit(1)
-  .prepare("redirect_by_domain_slug");
+  .prepare('redirect_by_domain_slug');
 
-export const domainQuery = db
+export const domainQuery = database
   .select({ id: domains.id })
   .from(domains)
-  .where(eq(domains.domain, sql.placeholder("domain")))
+  .where(eq(domains.domain, sql.placeholder('domain')))
   .limit(1)
-  .prepare("domain_by_name");
+  .prepare('domain_by_name');
 
-export const getAllLinksQuery = db
+export const getAllLinksQuery = database
   .select()
   .from(links)
-  .prepare("get_all_links_by_domain");
-
+  .prepare('get_all_links_by_domain');

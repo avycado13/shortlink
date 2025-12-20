@@ -3,9 +3,7 @@
   "compilerOptions": {
     /* Language & Environment */
     "target": "ES2022",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node"],
@@ -31,11 +29,6 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
