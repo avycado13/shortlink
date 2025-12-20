@@ -2,15 +2,15 @@ import { and, eq } from 'drizzle-orm';
 import type { Router } from 'ultimate-express';
 import express from 'ultimate-express';
 
-import { database } from './drizzle';
+import { database } from './drizzle.js';
 import {
   generateUniqueString,
   isValidDomain,
   isValidSlug,
   isValidUrl,
-} from './helpers';
-import { domainQuery } from './queries';
-import { domains, links } from './schema';
+} from './helpers.js';
+import { domainQuery } from './queries.js';
+import { domains, links } from './schema.js';
 
 export const apiRouter: Router = express.Router();
 

@@ -1,7 +1,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 
-import { database } from './drizzle';
-import { domains, links } from './schema';
+import { database } from './drizzle.js';
+import { domains, links } from './schema.js';
 
 export const redirectQuery = database
   .select({ url: links.url })

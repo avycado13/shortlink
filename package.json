@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch src/index.ts | pino-pretty",
-    "start": "NODE_ENV=production tsx src/index.ts",
+    "start": "NODE_ENV=production node dist/index.js",
     "build": "tsc",
     "format": "prettier --write .",
     "lint": "eslint .",

@@ -9,7 +9,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
-import { generateUniqueString } from './helpers';
+import { generateUniqueString } from './helpers.js';
 
 export const links = pgTable(
   'links',

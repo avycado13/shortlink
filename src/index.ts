@@ -10,12 +10,12 @@ import pino from 'pino';
 import pinoHttp from 'pino-http';
 import express from 'ultimate-express';
 
-import { apiRouter } from './api';
-import { database as database } from './drizzle';
-import { errorNotification } from './helpers';
-import { domainQuery, redirectQuery } from './queries';
-import { domains } from './schema';
-import { uiRouter } from './ui';
+import { apiRouter } from './api-router.js';
+import { database as database } from './drizzle.js';
+import { errorNotification } from './helpers.js';
+import { domainQuery, redirectQuery } from './queries.js';
+import { domains } from './schema.js';
+import { uiRouter } from './ui-router.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

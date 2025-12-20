@@ -27,7 +27,6 @@
     "skipLibCheck": true,
     /* Quality of life */
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
