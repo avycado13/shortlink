@@ -70,7 +70,8 @@ app.use((_, response, next) => {
 });
 
 app.disable('x-powered-by');
-
+// API routes
+app.use('/api', apiRouter);
 // Main redirect endpoint
 app.get('/s/:slug', async (request, response): Promise<void> => {
   const start = performance.now();
@@ -158,9 +159,6 @@ app.use(async (request, response, next): Promise<void> => {
     return;
   }
 });
-
-// API routes
-app.use('/api', apiRouter);
 
 // UI routes
 app.use('/', uiRouter);

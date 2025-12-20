@@ -59,6 +59,20 @@ apiRouter.use(async (request, response, next) => {
   }
 });
 
+apiRouter.get('/links', async (request, response) => {
+  try {
+    const domainLinks = await database
+      .select()
+      .from(links)
+      .leftJoin(domains, eq(links.domainId, domains.id));
+
+    response.json(domainLinks);
+  } catch (error) {
+    request.log.error({ error }, 'Failed to fetch links');
+    response.status(500).json({ error: 'Failed to fetch links' });
+  }
+});
+
 apiRouter.post(
   '/links/create',
   express.json(),
@@ -66,17 +80,31 @@ apiRouter.post(
     try {
       const { slug, url, domain } = request.body;
 
-      // Validate domain
-      if (!domain?.id) {
-        response
-          .status(400)
-          .json({ error: 'Domain is required and must have an id' });
-        return;
-      }
-
       // Validate URL
       if (!url || !isValidUrl(url)) {
         response.status(400).json({ error: 'Invalid URL format' });
+        return;
+      }
+
+      // Find domain by name
+      let domainId: number;
+      if (typeof domain === 'string') {
+        // Look up domain by name
+        const domainRecord = await database
+          .select({ id: domains.id })
+          .from(domains)
+          .where(eq(domains.domain, domain))
+          .limit(1);
+
+        if (domainRecord.length === 0) {
+          response.status(400).json({ error: 'Domain not found' });
+          return;
+        }
+        domainId = domainRecord[0].id;
+      } else if (domain?.id) {
+        domainId = domain.id;
+      } else {
+        response.status(400).json({ error: 'Valid domain is required' });
         return;
       }
 
@@ -92,14 +120,14 @@ apiRouter.post(
         }
         finalSlug = slug;
       } else {
-        finalSlug = generateUniqueString(16); // ← you must implement this
+        finalSlug = generateUniqueString(16);
       }
 
       // Check if slug already exists for this domain
       const existing = await database
         .select({ id: links.id })
         .from(links)
-        .where(and(eq(links.slug, finalSlug), eq(links.domainId, domain.id)))
+        .where(and(eq(links.slug, finalSlug), eq(links.domainId, domainId)))
         .limit(1);
 
       if (existing.length > 0) {
@@ -113,7 +141,7 @@ apiRouter.post(
         .values({
           slug: finalSlug,
           url,
-          domainId: domain.id,
+          domainId,
           active: true,
         })
         .returning({
@@ -124,6 +152,7 @@ apiRouter.post(
       response.status(201).json({
         message: 'Link created successfully',
         link: inserted,
+        slug: finalSlug, // Include slug in response for frontend
       });
     } catch (error) {
       request.log?.error({ error }, 'Failed to create link');
@@ -132,17 +161,44 @@ apiRouter.post(
   },
 );
 
-apiRouter.get('/links', async (request, response) => {
+apiRouter.delete('/links/:slug', async (request, response) => {
   try {
-    const domainLinks = await database
-      .select()
-      .from(links)
-      .leftJoin(domains, eq(links.domainId, domains.id));
+    const { slug } = request.params;
+    const { domain } = request.query;
 
-    response.json(domainLinks);
+    if (!domain) {
+      response
+        .status(400)
+        .json({ error: 'Domain query parameter is required' });
+      return;
+    }
+
+    // Find domain by name
+    const domainRecord = await database
+      .select({ id: domains.id })
+      .from(domains)
+      .where(eq(domains.domain, domain as string))
+      .limit(1);
+
+    if (domainRecord.length === 0) {
+      response.status(400).json({ error: 'Domain not found' });
+      return;
+    }
+
+    // Delete link with domain context
+    const deleteResult = await database
+      .delete(links)
+      .where(and(eq(links.slug, slug), eq(links.domainId, domainRecord[0].id)))
+      .returning({ id: links.id });
+
+    if (deleteResult.length === 0) {
+      response.status(404).json({ error: 'Link not found' });
+    } else {
+      response.json({ message: 'Link deleted successfully' });
+    }
   } catch (error) {
-    request.log.error({ error }, 'Failed to fetch links');
-    response.status(500).json({ error: 'Failed to fetch links' });
+    request.log.error({ error }, 'Failed to delete link');
+    response.status(500).json({ error: 'Failed to delete link' });
   }
 });
 
@@ -207,3 +263,24 @@ apiRouter.post(
     }
   },
 );
+
+apiRouter.delete('/domains/:domain', async (request, response) => {
+  try {
+    const { domain: domainName } = request.params;
+
+    // Delete domain
+    const deleteResult = await database
+      .delete(domains)
+      .where(eq(domains.domain, domainName))
+      .returning({ id: domains.id });
+
+    if (deleteResult.length === 0) {
+      response.status(404).json({ error: 'Domain not found' });
+    } else {
+      response.json({ message: 'Domain deleted successfully' });
+    }
+  } catch (error) {
+    request.log.error({ error }, 'Failed to delete domain');
+    response.status(500).json({ error: 'Failed to delete domain' });
+  }
+});
