@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "db:migrate": "drizzle-kit migrate",
-    "db:gen": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate"
   },
   "keywords": [],
   "author": "",
