@@ -117,6 +117,11 @@ app.get('/s/:slug', async (request, response): Promise<void> => {
   }
 });
 
+// Favicon fallback (avoid domain lookup for missing favicon)
+app.get('/favicon.ico', (_request, response) => {
+  response.status(204).end();
+});
+
 // Domain middleware for UI routes
 app.use(async (request, response, next): Promise<void> => {
   const host = request.hostname.toLowerCase();
