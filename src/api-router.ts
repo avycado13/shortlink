@@ -1,6 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import type { Router } from 'ultimate-express';
-import express from 'ultimate-express';
+import express, { type Router } from 'express';
 
 import { database } from './drizzle.js';
 import {

@@ -48,9 +48,7 @@ export const domains = pgTable(
   },
   table => [
     uniqueIndex('domains_domain_idx').on(table.domain),
-    uniqueIndex('domains_one_main_idx')
-      .on(table.main)
-      .where(sql`main = true`),
+    uniqueIndex('domains_one_main_idx').on(table.main).where(sql`main = true`),
   ],
 );
 

@@ -1,17 +1,15 @@
-import 'dotenv/config';
-
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import compression from 'compression';
 import { eq } from 'drizzle-orm';
 import errorhandler from 'errorhandler';
+import express from 'express';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
-import express from 'ultimate-express';
 
 import { apiRouter } from './api-router.js';
-import { database as database } from './drizzle.js';
+import { database } from './drizzle.js';
 import { errorNotification } from './helpers.js';
 import { domainQuery, redirectQuery } from './queries.js';
 import { domains } from './schema.js';
@@ -38,7 +36,6 @@ const httpLogger = pinoHttp({ logger });
 
 // Trust proxy - important for production
 app.set('trust proxy', true);
-app.set('catch async errors', true);
 
 // Logging middleware
 app.use(httpLogger);

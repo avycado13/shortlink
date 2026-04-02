@@ -1,5 +1,5 @@
+import type express from 'express';
 import pino from 'pino';
-import type express from 'ultimate-express';
 
 const logger = pino();
 

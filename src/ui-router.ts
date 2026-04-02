@@ -1,5 +1,4 @@
-import type { Router } from 'ultimate-express';
-import express from 'ultimate-express';
+import express, { type Router } from 'express';
 
 export const uiRouter: Router = express.Router();
 

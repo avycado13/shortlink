@@ -26,7 +26,7 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     /* Quality of life */
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
